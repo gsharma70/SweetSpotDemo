@@ -1,7 +1,7 @@
 # SweetSpotDemo
 Occupant Aware Environment Demo
 
-This is a simple demonstration of creating of occupant aware environments.
+This is a simple demonstration of creating occupant aware environments.
 
 ws_server.js is the server code that basically implements a handshake with the clients and
 echoes everythin that is sent to it. You need to install nodejs in order to run this server.
