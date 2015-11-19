@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+ 
+<html>
+    <head>
+        <title>Echo Chamber</title>
+        <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Web Speech API Demo</title>
+		<style>
+		  body
+		  {
+			background-color: grey;
+		  }
+		  .buttons-wrapper
+		  {
+			text-align: center;
+		  }
+
+		  .hidden
+		  {
+			display: none;
+		  }
+		  
+		  #log
+		  {
+			display: block;
+			width: 100%;
+			height: 5em;
+			overflow-y: scroll;
+			border: 1px solid #333333;
+			line-height: 1.3em;
+			display: none
+		  }
+
+		  .button-demo
+		  {
+			padding: 0.5em;
+			display: inline-block;
+			margin: 1em auto;
+			display: none
+		  }
+		  #transcription{
+			display:none;
+		  }
+		  #myVideo1 {
+			position:absolute;
+			left: 1000px;
+			top: 50px;
+			z-index:-1;
+			}
+			
+		  #transcription1{
+			position:absolute;
+			left: 1000px;
+			top: 78px;
+			max-width: 1500px;
+			display: none;
+			width: 100%;
+			height: 5em;
+			overflow-y: scroll;
+			border: none;
+			line-height: 1.3em;
+			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+			background: rgba(188, 198, 204, 0.7);
+			color:black;
+			font-weight:bold;
+			font-size:large;
+		  }
+		  
+		  #myVideo2 {
+			position:absolute;
+			left: 2650px;
+			top: 50px;
+			z-index:-1;
+		  }
+		  
+		  #transcription2{
+			position:absolute;
+			left: 2650px;
+			top: 78px;
+			max-width: 1500px;
+			display: none;
+			width: 100%;
+			height: 5em;
+			overflow-y: scroll;
+			border: none;
+			line-height: 1.3em;
+			background: rgba(188, 198, 204, 0.7);
+			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+			color:black;
+			font-weight:bold;
+			font-size:large;
+		  }
+		  
+		  #myVideo3 {
+			position:absolute;
+			left: 4300px;
+			top: 50px;
+			z-index:-1;
+		  }
+		  
+		  #transcription3{
+			position:absolute;
+			left: 4300px;
+			top: 78px;
+			max-width: 1500px;
+			display: none;
+			width: 100%;
+			height: 5em;
+			overflow-y: scroll;
+			border: none;
+			line-height: 1.3em;
+			background: rgba(188, 198, 204, 0.7);
+			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+			color:black;
+			font-weight:bold;
+			font-size:large;
+		  }
+			
+		  #myVideo4 {
+			position:absolute;
+			left: 5900px;
+			top: 50px;
+			z-index:-1;
+		  }
+		  #transcription4{
+			position:absolute;
+			left: 5900px;
+			top: 78px;
+			max-width: 1500px;
+			display: none;
+			width: 100%;
+			height: 5em;
+			overflow-y: scroll;
+			border: none;
+			line-height: 1.3em;
+			background: rgba(188, 198, 204, 0.7);
+			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+			color:black;
+			font-weight:bold;
+			font-size:large;
+		  }
+		  
+		  #custom-message1 {
+			position:absolute;
+			color: rgb(250, 255, 0);
+			z-index:-1;
+			left: 250px;
+			top: 400px;
+			font-size:xx-large;
+		  }
+		  #custom-message2 {
+			position:absolute;
+			color: rgb(250, 255, 0);
+			z-index:-1;
+			left: 850px;
+			top: 400px;
+			font-size:xx-large;
+		  }
+		  #custom-message3 {
+			position:absolute;
+			color: rgb(250, 255, 0);
+			z-index:-1;
+			left: 250px;
+			top: 900px;
+			font-size:xx-large;
+		  }
+		  #custom-message4 {
+			position:absolute;
+			color: rgb(250, 255, 0);
+			z-index:-1;
+			left: 850px;
+			top: 900px;
+			font-size:xx-large;
+		  }
+		</style>
+		<link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+		<div id="videoContainer">
+			<video id="myVideo1" src="video2.mp4" width = '1500' height = 900>
+			</video>
+			<video id="myVideo2" src="video1.mp4" width = '1500' height = 900>
+			</video>
+			<video id="myVideo3" src="video3.mp4" width = '1500' height = 900>
+			</video>
+			<video id="myVideo4" src="video4.mp4" width = '1500' height = 900>
+			</video>
+			<div id="custom-message1"></div>
+			<div id="custom-message2"></div>
+			<div id="custom-message3"></div>
+			<div id="custom-message4"></div>
+		</div>
+        <!-- Server responses get written here -->
+        <div id="messages"></div>
+		<textarea id="transcription" readonly="readonly"></textarea>
+		<textarea id="transcription1" readonly="readonly"></textarea>
+		<textarea id="transcription2" readonly="readonly"></textarea>
+		<textarea id="transcription3" readonly="readonly"></textarea>
+		<textarea id="transcription4" readonly="readonly"></textarea>
+		<div id="log"></div>
+
+		<div class="buttons-wrapper">
+		  <button id="button-play-ws" class="button-demo">Play demo</button>
+		  <button id="button-stop-ws" class="button-demo">Stop demo</button>
+		  <button id="clear-all" class="button-demo">Clear all</button>
+		</div>
+		<span id="ws-unsupported" class="hidden">API not supported</span>
+        <!-- Script to utilise the WebSocket -->
+        <script type="text/javascript">
+                       
+            var webSocket;
+            var messages = document.getElementById("messages");
+			var myVideo1 = document.getElementById('myVideo1');
+			var myVideo2 = document.getElementById('myVideo2');
+			var myVideo3 = document.getElementById('myVideo3');
+			var myVideo4 = document.getElementById('myVideo4');
+			myVideo1.loop = true;
+			myVideo2.loop = true;
+			myVideo3.loop = true;
+			myVideo4.loop = true;
+
+			/*
+			var text1 = document.getElementById('custom-message1');
+			var text2 = document.getElementById('custom-message2');
+			var text3 = document.getElementById('custom-message3');
+			var text4 = document.getElementById('custom-message4');
+			*/
+			var flag1 = 0;
+			var flag2 = 0;
+			var flag3 = 0;
+			var flag4 = 0;
+			//speech recognition
+			window.SpeechRecognition = window.SpeechRecognition ||
+                                 window.webkitSpeechRecognition ||
+                                 null;
+
+			var recognizer = new window.SpeechRecognition();
+			var transcription = document.getElementById('transcription');
+			var log = document.getElementById('log');
+			
+			//just for testing
+			/*
+			transcription.textContent = "testing the system here";
+			transcription1.textContent = transcription.textContent;
+			transcription1.style.display = 'block';
+			transcription2.style.display = 'block';
+			transcription3.style.display = 'block';
+			transcription4.style.display = 'block';
+			*/
+			//end testing
+			
+			// Recogniser doesn't stop listening even if the user pauses
+			recognizer.continuous = true;
+			recognizer.interimResults = true;
+			recognizer.start();
+			
+			// Start recognising
+			recognizer.onresult = function(event) {
+			  transcription.textContent = '';
+
+			  for (var i = event.resultIndex; i < event.results.length; i++) {
+				 transcription.textContent += event.results[i][0].transcript;
+			  }
+			};
+
+			document.getElementById('button-play-ws').addEventListener('click', function() {
+			  // Set if we need interim results
+			  recognizer.interimResults = true;//document.querySelector('input[name="recognition-type"][value="interim"]').checked;
+
+			  try {
+				recognizer.start();
+				log.innerHTML = 'Recognition started' + '<br />' + log.innerHTML;
+			  } catch(ex) {
+				log.innerHTML = 'Recognition error: ' + ex.message + '<br />' + log.innerHTML;
+			  }
+			});
+
+			document.getElementById('button-stop-ws').addEventListener('click', function() {
+			  recognizer.stop();
+			  log.innerHTML = 'Recognition stopped' + '<br />' + log.innerHTML;
+			});
+
+			// Ensures only one connection is open at a time
+			/*
+			if(webSocket !== undefined && webSocket.readyState !== WebSocket.CLOSED){
+			   writeResponse("WebSocket is already opened.");
+				return;
+			}
+			*/
+			// Create a new instance of the websocket
+			//webSocket = new WebSocket("ws://129.161.12.212:1136");
+			webSocket = new WebSocket("ws://128.113.20.15:1380");//studio 2
+			//webSocket = new WebSocket("ws://10.1.3.20:8080");
+			/**
+			 * Binds functions to the listeners for the websocket.
+			 */
+			webSocket.onopen = function(event){
+				if(event.data === undefined)
+					return;
+
+				writeResponse(event.data);
+			};
+
+			webSocket.onmessage = function(event){
+				//writeResponse(event.data);
+				// to play video
+				var res = event.data.split(" ")
+				if (res[0] == '0' && flag1 == 1){
+					myVideo1.pause();
+					//recognizer.stop();
+					//transcription.textContent = '';
+					transcription1.style.display = 'none';
+					//text1.style.display = 'none';
+					flag1 = 0;
+				}
+				if (res[0] == '1'){
+					//text1.innerHTML = transcription.textContent;
+					//text1.style.display = 'block';
+					transcription1.textContent = transcription.textContent;
+					if (flag1 == 0){
+						myVideo1.play();
+						transcription1.style.display = 'block';
+						//recognizer.interimResults = true;
+						transcription.textContent = '';
+						//recognizer.start();
+						flag1 = 1;
+					}
+				}
+				
+				if (res[1] == '0' && flag2 == 1){
+					myVideo2.pause();
+					//recognizer.stop();
+					//transcription.textContent = '';
+					transcription2.style.display = 'none';
+					//text2.style.display = 'none';
+					flag2 = 0;
+				}
+				if (res[1] == '1'){
+					//text2.innerHTML = transcription.textContent;
+					//text2.style.display = 'block';
+					transcription2.textContent = transcription.textContent;
+					if (flag2 == 0){
+						myVideo2.play();
+						transcription2.style.display = 'block';
+						//recognizer.interimResults = true;
+						transcription.textContent = '';
+						//recognizer.start();
+						flag2 = 1;
+					}
+				}
+				
+				if (res[2] == '0' && flag3 == 1){
+					myVideo3.pause();
+					//recognizer.stop();
+					//transcription.textContent = '';
+					transcription3.style.display = 'none';
+					//text3.style.display = 'none';
+					flag3 = 0;
+				}
+				if (res[2] == '1'){
+					//text3.innerHTML = transcription.textContent;
+					//text3.style.display = 'block';
+					transcription3.textContent = transcription.textContent;
+					if (flag3 == 0){
+						myVideo3.play();
+						transcription3.style.display = 'block';
+						//recognizer.interimResults = true;
+						transcription.textContent = '';
+						//recognizer.start();
+						flag3 = 1;
+					}
+				}
+				
+				if (res[3] == '0' && flag4 == 1){
+					myVideo4.pause();
+					//recognizer.stop();
+					//transcription.textContent = '';
+					transcription4.style.display = 'none';
+					//text4.style.display = 'none';
+					flag4 = 0;
+				}
+				if (res[3] == '1'){
+					//text4.innerHTML = transcription.textContent;
+					//text4.style.display = 'block';
+					transcription4.textContent = transcription.textContent;
+					if (flag4 == 0){
+						myVideo4.play();
+						transcription4.style.display = 'block';
+						//recognizer.interimResults = true;
+						transcription.textContent = '';
+						//recognizer.start();
+						flag4 = 1;
+					}
+				}
+				
+				
+			};
+
+			function writeResponse(text){
+				messages.innerHTML += "<br/>" + text;
+			}
+           
+        </script>
+       
+    </body>
+</html>
